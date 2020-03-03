@@ -22,7 +22,7 @@
 #include "openssl/err.h"
 #include "openssl/evp.h"
 #include "openssl/hmac.h"
-#include "openssl/mem.h"
+//#include "openssl/mem.h"
 #include "openssl/rsa.h"
 #include "openssl/sha.h"
 
@@ -95,9 +95,14 @@ bool verifySignatureEC(EC_KEY* key, const EVP_MD* md, const uint8_t* signature,
     return false;
   }
 
-  if (BN_bin2bn(signature, signature_len / 2, ecdsa_sig->r) == nullptr ||
-      BN_bin2bn(signature + (signature_len / 2), signature_len / 2,
-                ecdsa_sig->s) == nullptr) {
+  //if (BN_bin2bn(signature, signature_len / 2, ecdsa_sig->r) == nullptr ||
+  //    BN_bin2bn(signature + (signature_len / 2), signature_len / 2,
+  //              ecdsa_sig->s) == nullptr) {
+   const BIGNUM* r_bn;
+   const BIGNUM* s_bn;
+   ECDSA_SIG_get0(ecdsa_sig.get(), &r_bn, &s_bn);
+   if (BN_bin2bn(signature, 32, const_cast<BIGNUM *>(r_bn)) == nullptr ||
+       BN_bin2bn(signature + 32, 32, const_cast<BIGNUM *>(s_bn)) == nullptr) {
     return false;
   }
 
